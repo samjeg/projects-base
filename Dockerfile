@@ -88,8 +88,7 @@ RUN pip install \
 # large shared-libs layer above.
 RUN pip install \
         openai-whisper \
-        rembg[gpu] \
-        filetype
+        "rembg[gpu,cli]"
 
 # Strip bytecode caches and tests from the venv — saves hundreds of MB.
 RUN find /opt/venv -depth \
