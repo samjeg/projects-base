@@ -1,0 +1,16 @@
+# Windows / editor noise
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/
+
+# Python runtime junk (for any future scripts alongside the Dockerfile)
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Secrets — never commit tokens
+.env
+.env.*
