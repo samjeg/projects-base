@@ -144,6 +144,12 @@ COPY --from=builder /opt/venv /opt/venv
 # survive pod restarts.
 RUN mkdir -p /cache/huggingface /cache/torch /workspace
 
+# SSH sessions don't inherit Dockerfile ENV — PAM resets the environment
+# based on /etc/environment. Persist the critical vars so `python`, torch,
+# and the HF cache paths resolve correctly when users SSH into the pod.
+RUN printf 'PATH="/opt/venv/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"\nVIRTUAL_ENV="/opt/venv"\nHF_HOME="/cache/huggingface"\nTORCH_HOME="/cache/torch"\nXDG_CACHE_HOME="/cache"\n' \
+        > /etc/environment
+
 # Runpod-compatible entrypoint: seed authorized_keys from the PUBLIC_KEY env
 # var Runpod injects, generate sshd host keys on first boot, start sshd in
 # the background, then exec the container's command. This is what makes
