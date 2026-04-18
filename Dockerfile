@@ -81,6 +81,15 @@ RUN pip install \
         python-dotenv \
         typer
 
+# Video/audio tooling used across child projects:
+#   - openai-whisper: CLI + lib for speech-to-text (reaction, story, news styles)
+#   - rembg[gpu]: CLI + lib for background removal (reaction, cut-out overlays)
+# Pulled in their own RUN so adding/removing them doesn't invalidate the
+# large shared-libs layer above.
+RUN pip install \
+        openai-whisper \
+        rembg[gpu]
+
 # Strip bytecode caches and tests from the venv — saves hundreds of MB.
 RUN find /opt/venv -depth \
         \( -type d \( -name __pycache__ -o -name tests -o -name test \) \
