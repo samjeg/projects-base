@@ -88,7 +88,8 @@ RUN pip install \
 # large shared-libs layer above.
 RUN pip install \
         openai-whisper \
-        rembg[gpu]
+        rembg[gpu] \
+        filetype
 
 # Strip bytecode caches and tests from the venv — saves hundreds of MB.
 RUN find /opt/venv -depth \
@@ -181,8 +182,14 @@ RUN chmod +x /usr/local/bin/runpod-entrypoint.sh
 
 WORKDIR /workspace
 
-# Fail the build early if the venv copy broke or CUDA is missing from torch.
-RUN python -c "import torch, sys; print('python', sys.version); print('torch', torch.__version__, 'cuda_built', torch.version.cuda)"
+# Fail the build early if the venv copy broke, CUDA is missing from torch,
+# or any of the CLI tools have broken import chains. This catches broken
+# pip extras (e.g. rembg's CLI deps) on GHA instead of on a Runpod pod.
+RUN python -c "import torch, sys; print('python', sys.version); print('torch', torch.__version__, 'cuda_built', torch.version.cuda)" \
+    && python -c "from rembg.cli import main; print('rembg cli ok')" \
+    && python -c "import whisper; print('whisper ok')" \
+    && whisper --help >/dev/null && echo 'whisper cli ok' \
+    && rembg --help >/dev/null && echo 'rembg cli ok'
 
 ENTRYPOINT ["/usr/local/bin/runpod-entrypoint.sh"]
 CMD ["python"]
